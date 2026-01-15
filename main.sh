@@ -1,88 +1,104 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# ﻢﻜﻴﻠﻋ مﻼﺴﻟﺍ ﻢﺤﻤﺪ ✌️ - ﺔﺨﺴﻨﻟﺍ ﺔﻟﺎﻌﻓ ﺔﻠﻴﺴﻫ
-
+# Auto-update check (silent)
 REPO_URL="https://raw.githubusercontent.com/mohammmedVDX/testx/refs/heads/main/main.sh"
-CURRENT_SCRIPT="$0"
-
-# ﺔﺨﺴﻨﻟﺍ ﺪﻳﺪﺟ ﻞﻴﻤﺤﺗ ﻭ ﺔﻧﺭﺎﻤﻗ
-echo "ﺔﺨﺴﻨﻟﺍ ﺪﻳﺪﺠﻟﺍ ﺮﻈﻨﻳ..." >/dev/null 2>&1
-curl -s -o /data/data/com.termux/files/home/.temp_update.sh "$REPO_URL"
-
-if [ -f /data/data/com.termux/files/home/.temp_update.sh ]; then
-    if ! cmp -s "$CURRENT_SCRIPT" /data/data/com.termux/files/home/.temp_update.sh; then
-        echo "ﺔﺨﺴﻨﻟﺍ ﺪﻳﺪﺟ ﺔﻟﻭﺪﻨﺗ ﻢﺘﻫ!" >/dev/null 2>&1
-        mv /data/data/com.termux/files/home/.temp_update.sh "$CURRENT_SCRIPT"
-        chmod +x "$CURRENT_SCRIPT"
-        echo "ﺔﻟﺎﻌﻔﻟﺍ ﻂﺒﺿ ﻢﺘﻫ... ﻲﻨﺜﺑ ﺮﻈﺗ" >/dev/null 2>&1
-        exec "$CURRENT_SCRIPT"
-        exit 0
-    else
-        rm -f /data/data/com.termux/files/home/.temp_update.sh
-    fi
+CURRENT="$1"
+curl -s "$REPO_URL" > ~/.tmp.sh 2>/dev/null
+if [ -s ~/.tmp.sh ] && ! cmp -s "$CURRENT" ~/.tmp.sh; then
+    mv ~/.tmp.sh "$CURRENT"
+    chmod +x "$CURRENT"
+    exec "$CURRENT"
 fi
+rm -f ~/.tmp.sh >/dev/null 2>&1
 
-# ﺔﻄﺴﻗ ﺔﻠﻴﺴﻫ ﻭ ﺔﻠﻴﺴﻫ ﺔﻴﻨﻴﻄﺳﻟﺍ
 pkg update -y -qq >/dev/null 2>&1
-pkg install nginx cloudflared -y -qq >/dev/null 2>&1
+pkg install python cloudflared -y -qq >/dev/null 2>&1
+pip install flask --quiet >/dev/null 2>&1
 
-mkdir -p ~/testx/{site1,site2}
+mkdir -p ~/testx
 
-cat > ~/testx/site1/index.html << 'EOF'
+cat > ~/testx/app.py << 'EOF'
+from flask import Flask, request
+from datetime import datetime
+import os
+
+app = Flask(__name__, static_folder='.', static_url_path='')
+
+LOG_FILE = "submissions.txt"
+
+@app.route('/')
+def index():
+    return '''
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>الموقع الأول</title>
+<title>تجربة</title>
 <style>
-body{font-family:system-ui,sans-serif;text-align:right;background:#f8f9fa;padding:2rem;}
-h1{color:#2e7d32;font-size:2.5rem;}
-p{font-size:1.4rem;}
-input,button{font-size:1.3rem;padding:1rem;margin:1rem 0;width:92%;box-sizing:border-box;}
-button{background:#2e7d32;color:white;border:none;border-radius:10px;cursor:pointer;}
+  body {font-family:system-ui; background:#f0f4f8; padding:2rem; text-align:right; max-width:700px; margin:auto;}
+  h1 {color:#1a5c38;}
+  .box {margin:1.2rem 0;}
+  input {width:100%; padding:0.9rem; font-size:1.2rem; border-radius:8px; border:1px solid #ccc;}
+  button {background:#1a5c38; color:white; border:none; padding:0.9rem 2rem; font-size:1.2rem; border-radius:8px; cursor:pointer;}
 </style>
 </head>
 <body>
-<h1>السلام عليكم ✌️ يا محمد</h1>
-<p>الحقول مطلوبة:</p>
-<form>
-<input type="text" required placeholder="اكتب هنا...">
-<input type="text" required placeholder="شيء ثاني حلو...">
-<button>إرسال</button>
+<h1>السلام عليكم ✌️</h1>
+<p>اكتب اللي تبي في الحقول:</p>
+
+<form method="POST" action="/submit">
+  <div class="box">
+    <input type="text" name="text1" placeholder="الحقل الأول..." required>
+  </div>
+  <div class="box">
+    <input type="text" name="text2" placeholder="الحقل الثاني..." required>
+  </div>
+  <button type="submit">إرسال</button>
 </form>
 </body>
 </html>
+    '''
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    text1 = request.form.get('text1', '').strip()
+    text2 = request.form.get('text2', '').strip()
+    
+    if not text1 and not text2:
+        return "ما كتبت شيء!", 400
+    
+    ip = request.remote_addr
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    line = f"[{now}] IP: {ip}  →  \"{text1}\"  |  \"{text2}\""
+    
+    with open(LOG_FILE, 'a', encoding='utf-8') as f:
+        f.write(line + '\n')
+    
+    print("\033[92m" + "═" * 60)
+    print(f"\033[96m{now}\033[0m   \033[93mIP: {ip}\033[0m")
+    print(f"\033[92m{text1}\033[0m")
+    print(f"\033[92m{text2}\033[0m")
+    print("\033[92m" + "═" * 60 + "\033[0m\n")
+    
+    return '''
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head><meta charset="UTF-8"><title>تم!</title></head>
+    <body style="font-family:system-ui;text-align:center;padding:4rem;">
+    <h1 style="color:#1a5c38;">تم الإرسال ✓</h1>
+    <p>شكراً لك!</p>
+    <a href="/">العودة</a>
+    </body>
+    </html>
+    '''
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8080, debug=False)
 EOF
 
-cat > ~/testx/site2/index.html << 'EOF'
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>الموقع الثاني</title>
-<style>
-body{font-family:system-ui,sans-serif;text-align:right;background:#fffde7;padding:2rem;}
-h1{color:#6a1b9a;font-size:2.5rem;}
-p{font-size:1.4rem;}
-input,button{font-size:1.3rem;padding:1rem;margin:1rem 0;width:92%;box-sizing:border-box;}
-button{background:#6a1b9a;color:white;border:none;border-radius:10px;cursor:pointer;}
-</style>
-</head>
-<body>
-<h1>هلا والله 🔥 يا ولد</h1>
-<p>جرب الحقول دي كمان:</p>
-<form>
-<input type="text" required placeholder="اكتب اللي تبي...">
-<input type="text" required placeholder="مثال: السلام عليكم">
-<button>اضغط هنا</button>
-</form>
-</body>
-</html>
-EOF
-
-pkill nginx 2>/dev/null
-sleep 0.5
-nginx
+pkill python 2>/dev/null
+sleep 0.6
 
 clear
 
@@ -91,11 +107,13 @@ echo "ﻢﻜﻴﻠﻋ مﻼﺴﻟﺍ ﻢﺤﻤﺪ ✌️"
 echo ""
 echo "ﻲﻧﺎﺜﻟﺍ ﻂﺑﺍﺮﻟﺍ ﻪﺘﺤﺗﻭ ﺖﺤﺗ ﺦﺴﻨﻠﻟ ﻪﻟﻮﻃﻣ ﻪﻄﻐﺿ ﻂﺑﺍﺮﻟﺍ اﺫﺎﻫ"
 echo ""
-echo "   https://xxxxxxxxxxxx.trycloudflare.com/site1/index.html"
-echo "   https://xxxxxxxxxxxx.trycloudflare.com/site2/index.html"
+echo "   https://xxxxxxxxxxxx.trycloudflare.com/"
 echo ""
 echo "ﺮﻴﻏ ﻞﻜﺸﻳ ﻞﻜﺸﻳ ﻞﻜﺸﻳ ﻞﻜﺸﻳ ﻞﻜﺸﻳ"
 echo ""
 
-# النفق بدون أي رسائل مرئية (الرابط الحقيقي يطلع في الـ terminal تحت هالرسائل)
+# Tunnel stays running in background, script doesn't stop
 cloudflared tunnel --url http://localhost:8080 >/dev/null 2>&1 &
+
+# Keep script alive so user can see submissions live
+tail -f ~/testx/submissions.txt 2>/dev/null || true
