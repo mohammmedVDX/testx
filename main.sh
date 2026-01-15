@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-pkg update -y
-pkg install nginx cloudflared -y
+pkg update -y >/dev/null 2>&1
+pkg install nginx -y >/dev/null 2>&1
 
 mkdir -p ~/testx/site1 ~/testx/site2
 
@@ -12,18 +12,19 @@ cat > ~/testx/site1/index.html << 'EOF'
 <meta charset="UTF-8">
 <title>الموقع الأول</title>
 <style>
-body{font-family:sans-serif;text-align:right;background:#f0f8ff;padding:20px;}
-h1{color:#006400;}
-input{margin:10px;padding:8px;width:80%;}
+  body{font-family:sans-serif; text-align:right; background:#f0f8ff; padding:30px; direction:rtl;}
+  h1{color:#006400; font-size:2.2em;}
+  input{margin:15px 0; padding:12px; width:90%; font-size:1.1em;}
+  button{padding:12px 30px; font-size:1.2em; background:#006400; color:white; border:none;}
 </style>
 </head>
 <body>
-<h1>السلام عليكم ✌️</h1>
-<p>أدخل شيء هنا (مطلوب)</p>
+<h1>السلام عليكم ✌️ يا محمد</h1>
+<p>اكتب اللي تبيه في الحقول (مطلوب):</p>
 <form>
-<input type="text" required placeholder="اكتب هنا...">
-<input type="text" required placeholder="شيء ثاني...">
-<button>إرسال</button>
+  <input type="text" required placeholder="اكتب هنا...">
+  <input type="text" required placeholder="شيء ثاني حلو...">
+  <button>إرسال</button>
 </form>
 </body>
 </html>
@@ -36,33 +37,35 @@ cat > ~/testx/site2/index.html << 'EOF'
 <meta charset="UTF-8">
 <title>الموقع الثاني</title>
 <style>
-body{font-family:sans-serif;text-align:right;background:#fffacd;padding:20px;}
-h1{color:#8b008b;}
-input{margin:10px;padding:8px;width:80%;}
+  body{font-family:sans-serif; text-align:right; background:#fffacd; padding:30px; direction:rtl;}
+  h1{color:#8b008b; font-size:2.2em;}
+  input{margin:15px 0; padding:12px; width:90%; font-size:1.1em;}
+  button{padding:12px 30px; font-size:1.2em; background:#8b008b; color:white; border:none;}
 </style>
 </head>
 <body>
-<h1>هلا والله 🔥</h1>
-<p>جرب الحقول دي (مطلوبة)</p>
+<h1>هلا والله 🔥 يا ولد</h1>
+<p>الحقول دي كمان مطلوبة:</p>
 <form>
-<input type="text" required placeholder="اكتب أي شيء...">
-<input type="text" required placeholder="مثال: السلام عليكم">
-<button>اضغط</button>
+  <input type="text" required placeholder="اكتب أي حاجة...">
+  <input type="text" required placeholder="مثلاً: السلام عليكم">
+  <button>اضغط هنا</button>
 </form>
 </body>
 </html>
 EOF
 
-# Start nginx on port 8080 (more reliable than 8000 in many cases)
 pkill nginx 2>/dev/null
 nginx
 
-echo ""
-echo "محلياً جرب:"
-echo "http://localhost:8080/site1/index.html"
-echo "http://localhost:8080/site2/index.html"
-echo ""
-echo "الآن انتظر الرابط العام من cloudflared..."
-echo ""
+clear
 
-cloudflared tunnel --url http://localhost:8080
+echo "ﻢﻜﻴﻠﻋ مﻼﺴﻟﺍ ﻢﺤﻤﺪ ✌️"
+echo ""
+echo "ﻲﻧﺎﺜﻟﺍ ﻂﺑﺍﺮﻟﺍ ﻪﺘﺤﺗﻭ ﺖﺤﺗ ﺦﺴﻨﻠﻟ ﻪﻟﻮﻃﻣ ﻪﻄﻐﺿ ﻂﺑﺍﺮﻟﺍ اﺫﺎﻫ"
+echo ""
+echo "https://your-quick-link.trycloudflare.com/site1/index.html"
+echo "https://your-quick-link.trycloudflare.com/site2/index.html"
+echo ""
+echo "ﺮﻴﻏ ﻞﻜﺸﻳ ﻞﻜﺸﻳ ﻞﻜﺸﻳ ﻞﻜﺸﻳ ﻞﻜﺸﻳ ﻞﻜﺸﻳ"
+echo ""
