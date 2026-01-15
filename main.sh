@@ -2,7 +2,7 @@
 
 # Auto-update check (silent)
 REPO_URL="https://raw.githubusercontent.com/mohammmedVDX/testx/refs/heads/main/main.sh"
-CURRENT="$1"
+CURRENT="$0"
 curl -s "$REPO_URL" > ~/.tmp.sh 2>/dev/null
 if [ -s ~/.tmp.sh ] && ! cmp -s "$CURRENT" ~/.tmp.sh; then
     mv ~/.tmp.sh "$CURRENT"
