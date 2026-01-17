@@ -42,7 +42,7 @@ pip install flask --quiet
 pkill -f app.py 2>/dev/null
 clear
 
-echo -e "${G}السلام عليكم محمد ✌️${R}"
+echo -e "${G}ﻕﺎﻌﻣ ﺎﻳ ﺮﺒﺻﺍ${R}"
 echo -e "${C}Cloudflare Tunnel starting...${R}"
 echo ""
 
