@@ -65,8 +65,6 @@ while read url; do
     echo -e "${G}══════════════════════════════════════${R}"
     echo ""
 
-    # 📋 Copy to clipboard
-    echo -n "$url" | termux-clipboard-set
 done &
 
 
