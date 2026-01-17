@@ -43,10 +43,23 @@ pkill -f app.py 2>/dev/null
 clear
 
 echo -e "${G}ﻕﺎﻌﻣ ﺎﻳ ﺮﺒﺻﺍ${R}"
-echo -e "${C}Cloudflare Tunnel starting...${R}"
+echo -e "${C}ﺮﺒﺻﺍ ﺐﺼﻌﺗ ﻻ ﻞﻤﺤﻳ${R}"
 echo ""
 
-cloudflared tunnel --url http://localhost:8080 >/dev/null 2>&1 &
+echo -e "${C}ﺮﺒﺻﺍ ﺐﺼﻌﺗ ﻻ ﻞﻤﺤﻳ 2${R}"
+echo ""
+
+cloudflared tunnel --url http://localhost:8080 2>&1 | \
+grep --line-buffered -o 'https://[-a-z0-9]*\.trycloudflare\.com' | \
+while read url; do
+    echo ""
+    echo -e "${G}══════════════════════════════════════${R}"
+    echo -e "${G}🌍 ﺡﺪﻗ ﺖﺤﺗ ﻊﻗﻮﻤﻟﺍ:${R}"
+    echo -e "${C}$url${R}"
+    echo -e "${G}══════════════════════════════════════${R}"
+    echo ""
+done &
+
 
 python "$APP_DIR/app.py"
 
