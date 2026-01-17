@@ -52,7 +52,7 @@ except:
     print(t2)
     print("="*50)
 
-    return "Error 404"
+    return "Error404"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
