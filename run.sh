@@ -39,35 +39,49 @@ pkg install python cloudflared -y -qq >/dev/null
 pip install flask requests 
 
 
-### Run App ###
+### Run App (FIXED & STABLE) ###
+
 pkill -f app.py 2>/dev/null
-clear
+cd "$APP_DIR"
 
-echo -e "${G}ﻕﺎﻌﻣ ﺎﻳ ﺮﺒﺻﺍ${R}"
-echo -e "${C}ﺮﺒﺻﺍ ﺐﺼﻌﺗ ﻻ ﻞﻤﺤﻳ${R}"
-echo ""
+# 1) Start Flask FIRST
+python app.py > flask.log 2>&1 &
+FLASK_PID=$!
 
-echo -e "${C}ﺮﺒﺻﺍ ﺐﺼﻌﺗ ﻻ ﻞﻤﺤﻳ 2${R}"
-echo ""
+# 2) Wait for server
+sleep 2
 
+# 3) Start Cloudflared (safe mode)
 echo -e "${C}Starting Cloudflare Tunnel...${R}"
 echo ""
 
-cloudflared tunnel --protocol http2 --url http://localhost:8080
- 2>&1 | \
-grep --line-buffered -o 'https://[-a-z0-9]*\.trycloudflare\.com' | \
-while read url; do
+cloudflared tunnel \
+  --no-autoupdate \
+  --protocol http2 \
+  --url http://127.0.0.1:8080 \
+  --logfile cloudflared.log \
+  --loglevel info &
+
+# 4) Wait for tunnel
+sleep 3
+
+# 5) Get URL
+URL=$(grep -o 'https://[-a-z0-9]*\.trycloudflare\.com' cloudflared.log | head -n 1)
+
+if [ -n "$URL" ]; then
     echo ""
     echo -e "${G}══════════════════════════════════════${R}"
-    echo -e "${G}🌍 YOUR WEBSITE:${R}"
-    echo -e "${C}$url${R}"
-    echo -e "${G}📋 Copied to clipboard!${R}"
+    echo -e "${G}🌍 YOUR WEBSITE IS LIVE:${R}"
+    echo -e "${C}$URL${R}"
+    echo -e "${G}📋 Copied to clipboard${R}"
     echo -e "${G}══════════════════════════════════════${R}"
     echo ""
 
-done &
+    echo -n "$URL" | termux-clipboard-set
+else
+    echo -e "\033[91mFailed to get Cloudflare URL ❌\033[0m"
+    echo "Check cloudflared.log"
+fi
 
-
-
-python "$APP_DIR/app.py"
-
+# 6) Keep running
+wait $FLASK_PID
