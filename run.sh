@@ -36,7 +36,8 @@ fi
 ### Dependencies ###
 pkg update -y -qq >/dev/null
 pkg install python cloudflared -y -qq >/dev/null
-pip install flask --quiet
+pip install flask requests 
+
 
 ### Run App ###
 pkill -f app.py 2>/dev/null
