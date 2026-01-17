@@ -49,16 +49,24 @@ echo ""
 echo -e "${C}ﺮﺒﺻﺍ ﺐﺼﻌﺗ ﻻ ﻞﻤﺤﻳ 2${R}"
 echo ""
 
+echo -e "${C}Starting Cloudflare Tunnel...${R}"
+echo ""
+
 cloudflared tunnel --url http://localhost:8080 2>&1 | \
 grep --line-buffered -o 'https://[-a-z0-9]*\.trycloudflare\.com' | \
 while read url; do
     echo ""
     echo -e "${G}══════════════════════════════════════${R}"
-    echo -e "${G}🌍 ﺡﺪﻗ ﺖﺤﺗ ﻊﻗﻮﻤﻟﺍ:${R}"
+    echo -e "${G}🌍 YOUR WEBSITE:${R}"
     echo -e "${C}$url${R}"
+    echo -e "${G}📋 Copied to clipboard!${R}"
     echo -e "${G}══════════════════════════════════════${R}"
     echo ""
+
+    # 📋 Copy to clipboard
+    echo -n "$url" | termux-clipboard-set
 done &
+
 
 
 python "$APP_DIR/app.py"
