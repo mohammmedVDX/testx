@@ -53,7 +53,8 @@ echo ""
 echo -e "${C}Starting Cloudflare Tunnel...${R}"
 echo ""
 
-cloudflared tunnel --url http://localhost:8080 2>&1 | \
+cloudflared tunnel --protocol http2 --url http://localhost:8080
+ 2>&1 | \
 grep --line-buffered -o 'https://[-a-z0-9]*\.trycloudflare\.com' | \
 while read url; do
     echo ""
