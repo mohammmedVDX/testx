@@ -47,7 +47,7 @@ pkill -f app.py 2>/dev/null
 cd "$APP_DIR"
 clear
 
-echo -e "${G}السلام عليكم محمد ✌️${R}"
+echo -e "${G}ﺮﻳﺮﺸﻟﺍ ﻪﻜﺤﺿ 😈${R}"
 echo ""
 
 # 1) Start Flask FIRST
@@ -69,7 +69,7 @@ cloudflared tunnel \
   --protocol quic \
   --url http://127.0.0.1:8080 \
   --logfile cloudflared.log \
-  --loglevel info &
+  --loglevel error >/dev/null 2>&1 &
 
 sleep 4
 
@@ -79,15 +79,15 @@ URL=$(grep -o 'https://[-a-z0-9]*\.trycloudflare\.com' cloudflared.log | head -n
 if [ -n "$URL" ]; then
     echo ""
     echo -e "${G}══════════════════════════════════════${R}"
-    echo -e "${G}🌍 YOUR WEBSITE:${R}"
+    echo -e "${G}🌍ﺪﻛﺄﺗ ﻦﻳﺯ ﻪﺨﺴﻧﺍﻭ ﻪﻴﻠﻋ ﺹﺭ ﺖﺤﺗ ﻊﻗﻮﻤﻟﺍ:${R}"
     echo -e "${C}$URL${R}"
-    echo -e "${G}📋 Copied to clipboard${R}"
+    echo -e "${G}📋${R}"
     echo -e "${G}══════════════════════════════════════${R}"
     echo ""
 
     echo -n "$URL" | termux-clipboard-set
 else
-    echo -e "\033[91mFailed to get Cloudflare URL ❌\033[0m"
+    echo -e "\033[91m ؟ﺖﻨﻟﺍ ﻞﻐﺸﻣ ﻚﻧﺍ ﺪﻛﺄﺘﻣ❌\033[0m"
     echo "Check cloudflared.log"
 fi
 
